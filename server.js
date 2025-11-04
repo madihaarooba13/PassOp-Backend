@@ -2,6 +2,8 @@ const express = require('express')
 const dotenv = require('dotenv')
 const { MongoClient } = require('mongodb');
 const bodyparser = require('body-parser')
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 
 dotenv.config()
@@ -21,7 +23,17 @@ const app = express()
 const port = 3000
 const cors = require("cors")
 app.use(bodyparser.json())
-app.use(cors())
+
+// app.use(cors())
+app.use(cors({
+  origin: "https://pass-op-frontend-gfhu.vercel.app", // your Vercel site
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+}));
+
+app.get("/health", (req, res) => {
+  res.json({ ok: true });
+});
  
 // get all the password
 app.get('/', async (req, res) => {
@@ -30,6 +42,15 @@ app.get('/', async (req, res) => {
     const findResult = await collection.find({}).toArray();
     res.json(findResult)
 })
+
+// app.get('/', authenticateToken, async (req, res) => {
+//   const db = client.db(dbName);
+//   const collection = db.collection('passwords');
+//   const findResult = await collection.find({ userId: req.user.id }).toArray();
+//   res.json(findResult);
+// });
+
+
 // Save the password
 app.post('/', async (req, res) => {
   const password = req.body
